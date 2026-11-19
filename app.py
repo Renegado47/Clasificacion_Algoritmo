@@ -63,6 +63,8 @@ st.markdown(
     .fila {display: flex; justify-content: space-between; font-size: .85rem; margin-top: 10px;}
     .pista {background: #1F2937; border-radius: 99px; height: 10px; margin-top: 5px;}
     .relleno {height: 10px; border-radius: 99px;}
+    .veredicto {background:#1F2937; border-left:6px solid #3B82F6; border-radius:10px;
+                padding:12px 16px; margin:6px 0 4px;}
     .etiqueta {display:inline-block; font-size:.75rem; padding:2px 10px; border-radius:99px;
                background:#374151; color:#D1D5DB; margin-bottom:6px;}
     </style>
@@ -315,11 +317,13 @@ def clasificar(texto: str, key: str) -> dict:
     if isinstance(datos, dict):
         datos = datos.get("classes") or [datos]
 
-    resultado = {k: 0.0 for k in CATEGORIAS}
+    resultado = []
     for item in datos:
-        nombre = item.get("class_name") or item.get("label") or ""
-        clave = normalizar_etiqueta(nombre)
-        resultado[clave] = max(resultado[clave], float(item.get("confidence", 0)))
+        nombre = item.get("class_name") or item.get("label") or "(sin nombre)"
+        resultado.append({"nombre": nombre,
+                          "clave": normalizar_etiqueta(nombre),
+                          "confianza": float(item.get("confidence", 0))})
+    resultado.sort(key=lambda r: r["confianza"], reverse=True)
     return resultado
 
 
@@ -434,10 +438,27 @@ def seccion_test(key_activa: str):
                     st.warning(f"No se pudo consultar el modelo: {st.session_state.ml_error}")
                 elif st.session_state.ml:
                     ml = st.session_state.ml
-                    for clave, (nombre, color) in CATEGORIAS.items():
-                        v = max(0.0, min(100.0, ml[clave]))
+                    top = ml[0]
+                    color_top = CATEGORIAS[top["clave"]][1]
+                    st.markdown(
+                        f'<div class="veredicto" style="border-left-color:{color_top}">'
+                        f'El modelo clasifica esta definición como:<br>'
+                        f'<b style="font-size:1.2rem">{CATEGORIAS[top["clave"]][0]}</b> '
+                        f'con <b>{top["confianza"]:.0f}%</b> de confianza<br>'
+                        f'<small style="color:#9CA3AF">Etiqueta en ML4K: {html.escape(top["nombre"])}</small></div>',
+                        unsafe_allow_html=True,
+                    )
+                    clave_correcta = {v[0]: k for k, v in CATEGORIAS.items()}[q["correcta"]]
+                    if top["clave"] == clave_correcta:
+                        st.caption("✅ El modelo coincide con la respuesta correcta.")
+                    else:
+                        st.caption(f"⚠️ El modelo no coincide con la respuesta correcta ({q['correcta']}).")
+                    for i, r in enumerate(ml):
+                        v = max(0.0, min(100.0, r["confianza"]))
+                        color = CATEGORIAS[r["clave"]][1]
+                        marca = "★ " if i == 0 else ""
                         st.markdown(
-                            f'<div class="fila"><span>{nombre}</span><b>{v:.0f}%</b></div>'
+                            f'<div class="fila"><span>{marca}{CATEGORIAS[r["clave"]][0]}</span><b>{v:.0f}%</b></div>'
                             f'<div class="pista"><div class="relleno" style="width:{v}%;background:{color}"></div></div>',
                             unsafe_allow_html=True,
                         )
