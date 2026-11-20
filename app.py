@@ -324,32 +324,18 @@ def clasificar(texto: str, key: str) -> dict:
 
 
 def crear_test() -> list:
-    """10 preguntas: 3 de clasificar definiciones (una por familia, con opinión de ML4K)
-    + 7 al azar entre las demás (conceptos del documento y más definiciones), en orden aleatorio."""
+    """10 preguntas de clasificar definiciones (3 opciones): una por familia como mínimo
+    + 7 al azar entre las demás, en orden aleatorio. Todas se consultan al modelo de ML4K."""
     clasif = [(k, t, e) for k, t, e in C.BANCO_CLASIFICAR]
     elegidas = [random.choice([q for q in clasif if q[0] == c])
                 for c in ("informada", "noinformada", "evolutiva")]
+    resto = [q for q in clasif if q not in elegidas]
+    elegidas += random.sample(resto, NUM_PREGUNTAS - len(elegidas))
 
-    preguntas = []
-    for cat, texto, expl in elegidas:
-        preguntas.append({"tipo": "clasificar", "texto": texto,
-                          "opciones": [v[0] for v in CATEGORIAS.values()],
-                          "correcta": CATEGORIAS[cat][0], "explicacion": expl})
-
-    pool = [("clasificar", q) for q in clasif if q not in elegidas] + \
-           [("concepto", q) for q in C.BANCO_CONCEPTOS]
-    for tipo, q in random.sample(pool, NUM_PREGUNTAS - len(preguntas)):
-        if tipo == "clasificar":
-            cat, texto, expl = q
-            preguntas.append({"tipo": "clasificar", "texto": texto,
-                              "opciones": [v[0] for v in CATEGORIAS.values()],
-                              "correcta": CATEGORIAS[cat][0], "explicacion": expl})
-        else:
-            texto, correcta, malas, expl = q
-            opciones = [correcta] + list(malas)
-            random.shuffle(opciones)
-            preguntas.append({"tipo": "concepto", "texto": texto, "opciones": opciones,
-                              "correcta": correcta, "explicacion": expl})
+    preguntas = [{"tipo": "clasificar", "texto": texto,
+                  "opciones": [v[0] for v in CATEGORIAS.values()],
+                  "correcta": CATEGORIAS[cat][0], "explicacion": expl}
+                 for cat, texto, expl in elegidas]
     random.shuffle(preguntas)
     return preguntas
 
