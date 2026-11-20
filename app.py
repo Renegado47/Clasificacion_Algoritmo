@@ -1,4 +1,4 @@
-import base64
+}import base64
 import html
 import inspect
 import os
@@ -19,7 +19,7 @@ try:
 except ImportError:  # pragma: no cover
     option_menu = None
 
-st.set_page_config(page_title="Búsquedas en IA", page_icon="🧠", layout="centered")
+st.set_page_config(page_title="Búsquedas en IA", layout="centered")
 
 # ============================================================================
 # CONFIGURACIÓN
@@ -72,7 +72,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.markdown('<div class="titulo">🧠 Algoritmos de búsqueda en IA</div>', unsafe_allow_html=True)
+st.markdown('<div class="titulo">Algoritmos de búsqueda en IA</div>', unsafe_allow_html=True)
 st.markdown('<div class="subtitulo">Estudia la teoría, consulta el infográfico y ponte a prueba.</div>',
             unsafe_allow_html=True)
 
@@ -145,7 +145,7 @@ def mostrar_teoria(clave):
 
 
 def ejemplos_noinformada():
-    st.markdown("### 🎨 Ejemplos con dibujos")
+    st.markdown("### Ejemplos con dibujos")
 
     # --- BFS vs DFS
     st.markdown("#### 1. BFS vs DFS sobre el mismo árbol")
@@ -183,7 +183,7 @@ def ejemplos_noinformada():
 
 
 def ejemplos_informada():
-    st.markdown("### 🎨 Ejemplos con dibujos")
+    st.markdown("### Ejemplos con dibujos")
 
     st.markdown("#### 1. Una heurística real: el 8-puzzle")
     st.caption("En naranja, las fichas que no están en su lugar. h(n) = suma de las distancias Manhattan de cada ficha a su posición meta.")
@@ -212,7 +212,7 @@ def ejemplos_informada():
 
 
 def ejemplos_evolutiva():
-    st.markdown("### 🎨 Ejemplos con dibujos")
+    st.markdown("### Ejemplos con dibujos")
 
     st.markdown("#### 1. El ciclo de un algoritmo evolutivo")
     st.graphviz_chart(D.dot_ciclo_evolutivo())
@@ -231,7 +231,7 @@ def ejemplos_evolutiva():
     tam_pob = c2.slider("Tamaño de población", 6, 100, 30, key="ga_pob")
     pm = c3.slider("Prob. de mutación (pm)", 0.0, 0.2, 0.02, 0.005, key="ga_pm")
     gens = st.slider("Máximo de generaciones", 5, 200, 60, key="ga_gens")
-    if st.button("▶ Ejecutar algoritmo genético", key="ga_run"):
+    if st.button("Ejecutar algoritmo genético", key="ga_run"):
         mejor, prom, ind = D.ejecutar_ga(n_genes, tam_pob, pm, gens)
         st.line_chart({"Mejor aptitud": mejor, "Aptitud promedio": prom})
         st.markdown(f"Generaciones usadas: **{len(mejor) - 1}** · Mejor aptitud: **{mejor[-1]} / {n_genes}**")
@@ -246,7 +246,7 @@ def ejemplos_evolutiva():
 def seccion_informacion():
     st.header("Información general")
     st.write("Elige una familia de algoritmos de búsqueda. Cada una incluye teoría, algoritmos y ejemplos con dibujos.")
-    t1, t2, t3 = st.tabs(["🟧 No informada", "🟦 Informada", "🟩 Evolutiva"])
+    t1, t2, t3 = st.tabs(["No informada", "Informada", "Evolutiva"])
     with t1:
         mostrar_teoria("noinformada")
         ejemplos_noinformada()
@@ -275,7 +275,7 @@ def seccion_pdf():
         return
 
     datos = PDF_PATH.read_bytes()
-    st.download_button("⬇ Descargar PDF", datos, file_name=PDF_PATH.name, mime="application/pdf")
+    st.download_button("Descargar PDF", datos, file_name=PDF_PATH.name, mime="application/pdf")
     st.caption("Pasa el cursor sobre la imagen y pulsa el icono de pantalla completa para verla más grande.")
     try:
         for img in pdf_a_imagenes(str(PDF_PATH)):
@@ -439,24 +439,32 @@ def seccion_test(key_activa: str):
                 elif st.session_state.ml:
                     ml = st.session_state.ml
                     top = ml[0]
-                    color_top = CATEGORIAS[top["clave"]][1]
-                    st.markdown(
-                        f'<div class="veredicto" style="border-left-color:{color_top}">'
-                        f'El modelo clasifica esta definición como:<br>'
-                        f'<b style="font-size:1.2rem">{CATEGORIAS[top["clave"]][0]}</b> '
-                        f'con <b>{top["confianza"]:.0f}%</b> de confianza<br>'
-                        f'<small style="color:#9CA3AF">Etiqueta en ML4K: {html.escape(top["nombre"])}</small></div>',
-                        unsafe_allow_html=True,
-                    )
-                    clave_correcta = {v[0]: k for k, v in CATEGORIAS.items()}[q["correcta"]]
-                    if top["clave"] == clave_correcta:
-                        st.caption("✅ El modelo coincide con la respuesta correcta.")
+                    empatadas = [r for r in ml if abs(r["confianza"] - top["confianza"]) < 0.5]
+                    if len(empatadas) > 1:
+                        if len(empatadas) == len(ml):
+                            aviso = "todas las etiquetas tienen el mismo porcentaje"
+                        else:
+                            aviso = "hay empate entre " + ", ".join(CATEGORIAS[r["clave"]][0] for r in empatadas)
+                        st.markdown(
+                            '<div class="veredicto" style="border-left-color:#94A3B8">'
+                            f'<b style="font-size:1.2rem">El modelo no pudo decidir</b><br>'
+                            f'<small style="color:#9CA3AF">{aviso} ({top["confianza"]:.0f}% cada una)</small></div>',
+                            unsafe_allow_html=True,
+                        )
                     else:
-                        st.caption(f"⚠️ El modelo no coincide con la respuesta correcta ({q['correcta']}).")
+                        color_top = CATEGORIAS[top["clave"]][1]
+                        st.markdown(
+                            f'<div class="veredicto" style="border-left-color:{color_top}">'
+                            f'El modelo clasifica esta definición como:<br>'
+                            f'<b style="font-size:1.2rem">{CATEGORIAS[top["clave"]][0]}</b> '
+                            f'con <b>{top["confianza"]:.0f}%</b> de confianza<br>'
+                            f'<small style="color:#9CA3AF">Etiqueta en ML4K: {html.escape(top["nombre"])}</small></div>',
+                            unsafe_allow_html=True,
+                        )
                     for i, r in enumerate(ml):
                         v = max(0.0, min(100.0, r["confianza"]))
                         color = CATEGORIAS[r["clave"]][1]
-                        marca = "★ " if i == 0 else ""
+                        marca = "★ " if (i == 0 and len(empatadas) == 1) else ""
                         st.markdown(
                             f'<div class="fila"><span>{marca}{CATEGORIAS[r["clave"]][0]}</span><b>{v:.0f}%</b></div>'
                             f'<div class="pista"><div class="relleno" style="width:{v}%;background:{color}"></div></div>',
@@ -481,11 +489,11 @@ def seccion_test(key_activa: str):
 
         st.subheader("Revisión")
         for i, r in enumerate(st.session_state.registro, start=1):
-            icono = "✅" if r["acierto"] else "❌"
+            icono = "Acertaste" if r["acierto"] else "Fallaste"
             detalle = "" if r["acierto"] else f"<br><small>Tu respuesta: {html.escape(r['eleccion'])}</small>"
             st.markdown(
-                f'<div class="rev"><b>{icono} {i}. {html.escape(r["q"]["texto"])}</b><br>'
-                f'<small>Correcta: {html.escape(r["q"]["correcta"])}</small>{detalle}</div>',
+                f'<div class="rev"><b>{i}. {html.escape(r["q"]["texto"])}</b><br>'
+                f'<small>{icono} · Respuesta correcta: {html.escape(r["q"]["correcta"])}</small>{detalle}</div>',
                 unsafe_allow_html=True,
             )
 
