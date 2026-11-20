@@ -293,68 +293,50 @@ FAMILIAS = {
 # ----------------------------------------------------------------------------
 # BANCO DE PREGUNTAS
 # ----------------------------------------------------------------------------
-# Definiciones tomadas LITERALMENTE del documento Word (mismas frases con las que se entrena el modelo de ML4K).
-# Cada una: (categoría, definición, explicación). La app muestra solo las 4 etiquetas como opciones.
-BANCO_CLASIFICAR = (
-    [("noinformada", t, e) for t, e in [
-        ("Es llamada búsqueda ciega.", "El documento llama a la búsqueda no informada \"búsqueda ciega\"."),
-        ("Explora el espacio de estados usando únicamente la definición del problema.", "Usa solo la definición del problema, sin conocimiento extra: búsqueda no informada."),
-        ("No recibe ninguna estimación de qué tan cerca está la meta.", "Sin estimación de la cercanía a la meta, la búsqueda es no informada."),
-        ("No usa una función heurística h(n).", "No usar heurística h(n) es lo que define a la búsqueda no informada."),
-        ("Todos los estados que aún no ha visitado le parecen igual de prometedores.", "Sin heurística, todos los estados sin visitar parecen igual de prometedores."),
-        ("No puede priorizar los que “parecen” más cercanos a la meta.", "Al no tener heurística, no puede priorizar nodos: búsqueda no informada."),
-        ("Son sencillos de implementar y de razonar.", "Es una ventaja de la búsqueda no informada: es sencilla de implementar."),
-        ("No requieren conocimiento extra del dominio (solo las reglas del problema).", "Solo necesita las reglas del problema: búsqueda no informada."),
-        ("Algunos garantizan encontrar la solución óptima (BFS en pasos, costo uniforme en costo).", "BFS y costo uniforme son algoritmos de búsqueda no informada."),
-        ("El tiempo y la memoria crecen de forma exponencial con la profundidad de la solución.", "Es la gran desventaja de la búsqueda no informada."),
-        ("No aprovechan pistas del problema que sí podrían acelerar la búsqueda.", "Al no usar heurística, no aprovecha pistas del problema: no informada."),
-        ("Se utiliza en espacios de estados pequeños o medianos.", "La búsqueda no informada solo es viable en espacios pequeños o medianos."),
-        ("Expande todos los nodos de un nivel antes de pasar al siguiente, por lo que encuentra la ruta con menos pasos.", "Es la búsqueda en amplitud (BFS), que es no informada."),
-        ("Avanza por una rama hasta el fondo y, si no hay salida, retrocede (backtracking) para probar otra rama.", "Es la búsqueda en profundidad (DFS), que es no informada."),
-        ("Es DFS con un límite máximo de profundidad L. Al llegar al límite, retrocede como si el nodo no tuviera sucesores.", "Es la búsqueda de profundidad limitada, que es no informada."),
-        ("Repite la búsqueda de profundidad limitada con L = 0, 1, 2… hasta encontrar la meta. Combina la poca memoria de DFS con la completitud de BFS.", "Es la profundización iterativa (IDS), que es no informada."),
-        ("Se expande siempre el nodo con menor costo acumulado g(n). Encuentra la solución de menor costo, aunque no sea la de menos pasos.", "Es costo uniforme (Dijkstra): solo usa g(n), sin heurística."),
-        ("Ejecuta dos búsquedas simultáneas, una desde el estado inicial y otra desde la meta, hasta que sus fronteras se encuentran. Explora muchos menos nodos.", "Es la búsqueda bidireccional, que es no informada."),
-    ]]
-    + [("informada", t, e) for t, e in [
-        ("Es llamada búsqueda heurística.", "El documento llama a la búsqueda informada \"búsqueda heurística\"."),
-        ("Explora el espacio de estados usando la definición del problema y además conocimiento específico del dominio.", "El conocimiento específico del dominio es lo que la hace informada."),
-        ("Recibe una estimación de qué tan cerca está cada estado de la meta.", "Recibir una estimación de la cercanía a la meta es búsqueda informada."),
-        ("Usa una función heurística h(n), por ejemplo la distancia en línea recta a la meta o la distancia Manhattan.", "Usar una función heurística h(n) caracteriza a la búsqueda informada."),
-        ("Los estados que aún no ha visitado no le parecen igual de prometedores: los compara según su valor heurístico.", "Compara los estados según su valor heurístico: búsqueda informada."),
-        ("Puede priorizar los que “parecen” más cercanos a la meta.", "Gracias a la heurística puede priorizar nodos: búsqueda informada."),
-        ("Reduce de forma considerable el número de nodos que explora.", "Es la gran ventaja de la búsqueda informada."),
-        ("Algunos garantizan encontrar la solución óptima (A* con una heurística admisible).", "A* con heurística admisible es búsqueda informada."),
-        ("Diseñar una buena heurística requiere conocer el dominio, y algunos algoritmos (como A*) consumen mucha memoria.", "Son las desventajas de la búsqueda informada."),
-        ("Expande siempre el nodo que parece más cercano a la meta según h(n), sin considerar el costo ya recorrido. Es rápida, pero no garantiza la solución óptima.", "Es la búsqueda voraz primero el mejor: ordena solo por h(n)."),
-        ("Combina el costo recorrido y el estimado, expandiendo el nodo con menor f(n) = g(n) + h(n). Es completa y óptima si h(n) es admisible.", "Es A*, el ejemplo clásico de búsqueda informada."),
-        ("Es A* con f(n) = g(n) + w·h(n) y w > 1. Da más peso a la heurística, por lo que encuentra soluciones más rápido a cambio de perder la garantía de optimalidad.", "Es A* ponderado, una búsqueda informada."),
-        ("Repite una búsqueda en profundidad con un umbral sobre f(n) que aumenta en cada iteración. Conserva la optimalidad de A* usando muy poca memoria.", "Es IDA*: profundización iterativa sobre f(n)."),
-        ("Imita a A* usando recursión y espacio lineal. Recuerda el f(n) de la mejor alternativa y retrocede cuando el camino actual deja de ser el más prometedor.", "Es RBFS (primero el mejor recursivo), una búsqueda informada."),
-        ("Funciona como A* hasta llenar la memoria disponible; entonces descarta el nodo menos prometedor para seguir. Es completo y óptimo si la solución cabe en memoria.", "Es SMA* (A* con memoria acotada), una búsqueda informada."),
-    ]]
-    + [("evolutiva", t, e) for t, e in [
-        ("Es llamada computación evolutiva o búsqueda basada en poblaciones.", "Son los otros nombres de la búsqueda evolutiva."),
-        ("Se inspira en la evolución biológica: selección natural, reproducción y mutación.", "Imita la evolución biológica: búsqueda evolutiva."),
-        ("Mantiene una población de soluciones candidatas, en lugar de un solo estado o una frontera de nodos.", "Mantener una población de soluciones es propio de la búsqueda evolutiva."),
-        ("Usa una función de aptitud (fitness) f(x) que mide qué tan buena es cada solución.", "La función de aptitud es el concepto central de la búsqueda evolutiva."),
-        ("Las mejores soluciones tienen mayor probabilidad de reproducirse; las peores tienden a desaparecer.", "Es el principio de selección de la búsqueda evolutiva."),
-        ("Genera nuevas soluciones combinando (cruce) y alterando (mutación) las existentes.", "Cruce y mutación pertenecen a la búsqueda evolutiva."),
-        ("Explora muchas regiones del espacio de búsqueda a la vez, lo que reduce el riesgo de quedar atrapada en óptimos locales.", "Al tener una población, explora muchas regiones a la vez: búsqueda evolutiva."),
-        ("No requiere derivadas ni conocimiento matemático del problema; solo necesita poder evaluar la aptitud.", "Solo necesita evaluar la aptitud: búsqueda evolutiva."),
-        ("No garantiza encontrar la solución óptima; entrega una buena aproximación.", "Es una desventaja de la búsqueda evolutiva."),
-        ("Es costosa en cómputo (evalúa muchos individuos por generación) y exige ajustar parámetros como el tamaño de la población y las tasas de cruce y mutación.", "Son las desventajas de la búsqueda evolutiva."),
-        ("Evoluciona una población de cromosomas mediante selección, cruce y mutación, buscando individuos con mejor aptitud generación tras generación.", "Es el algoritmo genético, típico de la búsqueda evolutiva."),
-        ("Evoluciona programas o expresiones representados como árboles, en lugar de cadenas de valores. Sirve para descubrir fórmulas o programas que resuelven un problema.", "Es la programación genética, una técnica evolutiva."),
-        ("Trabajan con vectores de números reales y se basan sobre todo en la mutación gaussiana, cuya magnitud σ también evoluciona junto con el individuo.", "Son las estrategias evolutivas."),
-        ("Evoluciona una población usando solo mutación, sin cruce. Cada padre produce un hijo y la selección se hace por torneo entre todos.", "Es la programación evolutiva."),
-        ("Crea nuevos individuos sumando a uno la diferencia ponderada de otros dos. Es muy usada en optimización de variables continuas.", "Es la evolución diferencial."),
-        ("Una población de partículas se mueve por el espacio de búsqueda guiada por su mejor posición personal y por la mejor del enjambre.", "Es PSO, que se agrupa con la computación evolutiva por ser basada en poblaciones."),
-    ]]
-)
+# Tipo 1: "¿Qué tipo de búsqueda describe esta definición?"  (categoría, definición, explicación)
+# Estas preguntas además consultan el modelo de Machine Learning for Kids.
+BANCO_CLASIFICAR = [
+    ("informada", "Algoritmo que usa una función heurística para decidir qué nodo expandir primero.",
+     "La heurística es conocimiento extra del problema: eso es búsqueda informada."),
+    ("informada", "Algoritmo que combina el coste recorrido g(n) con una estimación h(n) hacia la meta.",
+     "Es A*, el ejemplo clásico de búsqueda informada."),
+    ("informada", "Búsqueda que siempre expande el nodo que parece más cercano a la meta según una estimación.",
+     "La búsqueda voraz primero el mejor se guía por una heurística."),
+    ("informada", "Método que explora menos nodos porque se orienta con una estimación de la distancia a la meta.",
+     "Usar una estimación de la distancia a la meta caracteriza a la búsqueda informada."),
+    ("informada", "Repite una búsqueda en profundidad con un umbral sobre f(n) que aumenta en cada iteración.",
+     "Es IDA*: profundización iterativa sobre el valor de f(n)."),
+    ("informada", "Usa una cola de prioridad ordenada por f(n) = g(n) + w·h(n) con w > 1 para ganar velocidad.",
+     "Es A* ponderado: un peso mayor a la heurística, a cambio de perder la optimalidad."),
+
+    ("noinformada", "Recorre el grafo nivel por nivel sin ningún conocimiento extra del problema.",
+     "Es la búsqueda en anchura (BFS): no usa heurística."),
+    ("noinformada", "Explora una rama hasta el fondo antes de retroceder, usando una pila.",
+     "La búsqueda en profundidad es no informada."),
+    ("noinformada", "Expande siempre el nodo con menor coste acumulado desde el inicio, sin estimar la distancia a la meta.",
+     "El coste uniforme solo usa g(n); no tiene heurística."),
+    ("noinformada", "Solo conoce los estados, las acciones y si un estado es la meta; no sabe qué tan cerca está de ella.",
+     "Sin información sobre la cercanía a la meta, la búsqueda es no informada."),
+    ("noinformada", "Repite la búsqueda de profundidad limitada con L = 0, 1, 2… hasta hallar la meta.",
+     "Es la profundización iterativa (IDS), una búsqueda no informada."),
+    ("noinformada", "Ejecuta dos búsquedas simultáneas, una desde el inicio y otra desde la meta, hasta que se encuentran.",
+     "Es la búsqueda bidireccional: no usa heurística."),
+
+    ("evolutiva", "Mantiene una población de soluciones que evolucionan mediante cruce y mutación.",
+     "Es un algoritmo genético, típico de la búsqueda evolutiva."),
+    ("evolutiva", "Evalúa cada individuo con una función de aptitud y selecciona a los mejores para reproducirse.",
+     "Aptitud y selección son conceptos de la búsqueda evolutiva."),
+    ("evolutiva", "Se inspira en la selección natural: los individuos mejor adaptados dejan más descendencia.",
+     "Imita la evolución biológica: búsqueda evolutiva."),
+    ("evolutiva", "Combina partes de dos soluciones padre y cambia genes al azar para crear nuevas soluciones.",
+     "Cruce y mutación pertenecen a la búsqueda evolutiva."),
+    ("evolutiva", "Los individuos son árboles sintácticos y el cruce consiste en intercambiar subárboles.",
+     "Es la programación genética, una técnica evolutiva."),
+    ("evolutiva", "Partículas con posición y velocidad se mueven guiadas por su mejor posición y la mejor del enjambre.",
+     "Es PSO, que se agrupa con la computación evolutiva por ser basada en poblaciones."),
+]
 
 # Tipo 2: preguntas de opción múltiple tomadas del documento Word.
-# (YA NO SE USAN en el test actual; se conservan por si quieres reactivarlas.)
 # (pregunta, respuesta correcta, [3 distractores], explicación)
 BANCO_CONCEPTOS = [
     # ---- No informada
