@@ -1,4 +1,4 @@
-}import base64
+import base64
 import html
 import inspect
 import os
